@@ -22,3 +22,6 @@ Scrapy seemed like the next best option. But Airbnb is a Single Page Application
 Now I'll have to do something, which I was trying to avoid from the very beginning.
 Selenium.
 
+
+
+Realized a new limitation with Selenium. 
