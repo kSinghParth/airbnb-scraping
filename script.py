@@ -25,49 +25,30 @@ response = []
 driver.get('https://www.airbnb.com/s/Boston--MA--United-States/homes?place_id=ChIJGzE9DS1l44kRoOhiASS_fHg&refinement_paths%5B%5D=%2Fhomes&adults=0&children=0&infants=0&pets=0&search_type=AUTOSUGGEST')
 
 time.sleep(10)
-
-next_button = '//*[@id="site-content"]/div[4]/div/div/div'
+next_button = '._1bfat5l'
 listing = '.ltlgcp'
-
+name=".k1pnia7m.dir.dir-ltr"
+rating = ".s1hj3bst.dir.dir-ltr"
+rating2=".b1odgil1.dir.dir-ltr div"
 def each_page():
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    time.sleep(10)
-    driver.find_element(By.XPATH,next_button).click()
-    time.sleep(10)
-    listings = driver.find_elements(By.CSS_SELECTOR,'.ltlgcp')
+    time.sleep(1)
+    # time.sleep(10)
+    listings = driver.find_elements(By.CSS_SELECTOR,listing)
     print(len(listings))
     for list in listings:
-        print(list)
-    driver.find_element(By.XPATH,next_button).click()
+        print(list.find_element(By.CSS_SELECTOR,name).text)
+        try:
+            print(list.find_element(By.CSS_SELECTOR,rating).text)
+        except:
+            print("No rating")
+        print()
+        
 
-    time.sleep(20)
+
+    # driver.find_element(By.CSS_SELECTOR,next_button).click()
+    # time.sleep(20)
 
 each_page()
 exit()
 
-
-
-# print("Starting search")
-# inp_xpath_search = '//*[@id="side"]/div[1]/div/label/div/div[2]'
-# search=driver.find_element(by=By.XPATH, value=inp_xpath_search)
-# time.sleep(3)
-# search.click()
-# time.sleep(3)
-# print("waiting done")
-
-# with open('numbers', 'r') as numbers:
-#     nums= numbers.readlines()
-#     for n in nums:
-#         contact=n.strip()[1:-2].strip()
-#         #contact='Gandarhv'
-#         #print(n.strip()[1:-1])
-#         search.send_keys(contact)
-#         time.sleep(3)
-#         time.sleep(3)
-#         message = driver.find_element(By.XPATH,'//*[@id="main"]/footer/div[1]/div/div/div[2]/div[1]/div/div[2]')
-#         time.sleep(3)
-#         message.send_keys(text +Keys.ENTER)
-#         #driver.find_element(by=By.XPATH, value='//*[@id="pane-side"]/div[1]/div/div/div[6]/div/div/div[2]').click()
-#         time.sleep(3)
-#         search.clear()
-# print("Ending...")
