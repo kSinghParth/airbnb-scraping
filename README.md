@@ -24,9 +24,10 @@ Scrapy seemed like the next best option. But Airbnb is a Single Page Application
 
 Each time I see that a search area has more than 300 listings, I partition the area into 4 quarters and then search those individually. If any of those 4 quarters contain more than 300 entries, it will be partitioned further, and so on. Recursion-ion-ion-ion.
 
-Since, with latitude longitude boundaries, I can only parse rectangular areas, please see below the covered area.
+Since, with latitude longitude boundaries, I can only parse rectangular areas, please see different ways to cover Boston.
 
-![Boston covered area](/images/covered_area.png)
+![Boston covered area with blocks](/images/covered_area_blocks.png)
+![Boston covered area with single block](/images/covered_area_single.png)
 
 
 7. Finally, Airbnb will likely block an IP if used too often, so I had to rotate IP using proxies.
@@ -74,3 +75,23 @@ python script.py
 
 
 Note: Even if the script crashes at any point, you don't need to worry, simply run it again, and it won't search the previously parsed latitudes and longitudes.
+
+## Outcome
+
+I parsed Boston city with two approaches.
+
+1. With a single big rectangular block. This also included certain areas not in Boston.
+
+![Boston covered area with single block](/images/covered_area_single.png)
+
+	Number of Listings returned = 3707
+
+	You can find the list here: https://github.com/kSinghParth/airbnb-scrapping/blob/main/listing_in_boston_single.csv
+
+2. With multiple smaller blocks to keep the search results strictly within Boston.
+
+![Boston covered area with blocks](/images/covered_area_blocks.png)
+
+	Number of Listings returned = 3113
+
+	You can find the list here: https://github.com/kSinghParth/airbnb-scrapping/blob/main/listing_in_boston_blocks.csv

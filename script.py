@@ -24,7 +24,7 @@ import datetime
 from constants import next_button_selector, listings_selector, listing_id_regex,listing_name_selector, listing_rating_selector, result_file_name, search_url, coordinates, coordinate_lookup_file_name, listing_id_selector
 
 
-logging.basicConfig(filename='logs/airbnb_scapper_' + str(datetime.datetime.now()) + '.log', filemode='w', format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+logging.basicConfig(filename='logs/airbnb_scapper_' + str(datetime.datetime.now()) + '.log', filemode='w', format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 #Result object
 result = {}
@@ -126,6 +126,7 @@ def grid_search_and_divide(coordinate, driver):
     for key in coordinate:
         complete_url = complete_url + '&' + key + '=' + coordinate[key]
 
+    logging.info(complete_url)
     #Starting the driver
     driver.get(complete_url)
 
@@ -134,7 +135,6 @@ def grid_search_and_divide(coordinate, driver):
 
     results_added = each_page(driver)
 
-    logging.info("Results from coordinates: " + str(results_added))
     if results_added >= 300 :
         logging.info("Diving further " + coordinate_string(coordinate))
         mid_lat = (float(coordinate['ne_lat']) + float(coordinate['sw_lat']))/2
@@ -151,6 +151,7 @@ def grid_search_and_divide(coordinate, driver):
 
 
 def each_page(driver):
+    local_listing_count_added = 0
     local_listing_count = 0
     while True:
         #Scrolling to the bottom of the page, for the next button to render
@@ -160,6 +161,7 @@ def each_page(driver):
         #Selecting a list of all listings on this page
         listings = driver.find_elements(By.CSS_SELECTOR,listings_selector)
         
+        local_listing_count = local_listing_count + len(listings)
         for list in listings:
             listing_id = parse_id(list.find_element(By.CSS_SELECTOR,listing_id_selector).get_attribute("id"))
             if is_listing_allowed(listing_id):
@@ -171,9 +173,10 @@ def each_page(driver):
                     rating_of_listing = 'No Rating'
                     logging.info(listing_id + ' has no rating')
                 result[listing_id] = [listing_id, name_of_listing, rating_of_listing]
-                local_listing_count = local_listing_count + 1
+                local_listing_count_added = local_listing_count_added + 1
                 logging.info('Added listing: ' + listing_id)
         
+        logging.info('Total listings found: ' + str(local_listing_count) + ', Listings added: ' + str(local_listing_count_added))
         try:
             #Handling pagination of results    
             next_page_button = driver.find_element(By.CSS_SELECTOR,next_button_selector)
