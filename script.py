@@ -6,6 +6,9 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from fp.fp import FreeProxy
+# from http_request_randomizer.requests.proxy.requestProxy import RequestProxy
+
 import os
 import time
 import yaml
@@ -16,26 +19,61 @@ import csv
 
 from constants import next_button_selector, listings_selector, listing_name_selector, listing_rating_selector, result_file_name, search_url, coordinates
 
-
-#Driver setup
-
-# try:
-#     with open("conf.yaml", 'r') as stream:
-#         chrome_driver = yaml.safe_load(stream).get('chrome_driver')
-# except:
-    # print('Unable to read driver location')
-chrome_driver = os.environ.get('CHROME_DRIVER')
-driver=webdriver.Chrome(executable_path=chrome_driver)
-
 #Result object
 result = {}
 headerrow = ['Name and Description', 'Rating']
 
-def itr_search(coordinates):
-    for coordinate  in coordinates:
-        grid_search_and_divide(coordinate)
+# # Trying out different free proxy
+#
+# try:
+#     #Fetching proxies
+#     req_proxy = RequestProxy() #you may get different number of proxy when  you run this at each time
+#     proxies = req_proxy.get_proxy_list() #this will create proxy list
+#     print(proxies[0])
+# except:
+#     pass
 
-def grid_search_and_divide(coordinate):
+def itr_search(coordinates):
+
+    # try:
+    #     PROXY = FreeProxy(country_id=['US', 'ID', 'JP', 'MX', 'FR', 'IN', 'BR', 'SG', 'DE'], timeout=1, rand=True).get()
+    #     print('Proxy selected: ' + PROXY)
+    # except:
+    #     print('No proxies found')
+    #     PROXY = None
+    # # Setting proxy
+    # webdriver.DesiredCapabilities.CHROME['proxy']={
+    # "httpsProxy":PROXY,
+    # "httpProxy":PROXY,
+    # "ftpProxy":PROXY,
+    # "sslProxy":PROXY,
+    # "proxyType":"MANUAL",
+    # }
+
+    # # Driver setup
+    
+    # # I have saved my driver location as an environment variable. 
+    # # Other users can save it in conf.yaml file and un-comment this snippet.
+    
+    # try:
+    #     with open("conf.yaml", 'r') as stream:
+    #         chrome_driver = yaml.safe_load(stream).get('chrome_driver')
+    # except:
+    #     print('Unable to read driver location')
+
+    # # Getting driver location from env variable
+    chrome_driver = os.environ.get('CHROME_DRIVER')
+    driver=webdriver.Chrome(executable_path=chrome_driver)
+
+    # driver.get('https://www.expressvpn.com/what-is-my-ip')
+    # time.sleep(20)
+
+    for coordinate  in coordinates:
+        grid_search_and_divide(coordinate, driver)
+
+    # driver.close()
+
+def grid_search_and_divide(coordinate, driver):
     complete_url = search_url
     for key in coordinate:
         complete_url = complete_url + '&' + key + '=' + coordinate[key]
@@ -45,7 +83,7 @@ def grid_search_and_divide(coordinate):
     driver.get(complete_url)
 
     #Allow loading time for the whole page to render. Since Airbnb is a SPA, a lot of backend calls are involved
-    time.sleep(7)
+    time.sleep(10)
 
     results_added = each_page(driver)
 
@@ -53,7 +91,10 @@ def grid_search_and_divide(coordinate):
         mid_lat = (float(coordinate['ne_lat']) + float(coordinate['sw_lat']))/2
         mid_lng = (float(coordinate['ne_lng']) + float(coordinate['sw_lng']))/2
         new_coorindates = [
+            {'ne_lat': coordinate['ne_lat'], 'ne_lng': coordinate['ne_lng'], 'sw_lat': str(mid_lat),'sw_lng': str(mid_lng)},
             {'ne_lat': str(mid_lat), 'ne_lng': str(mid_lng), 'sw_lat': coordinate['sw_lat'],'sw_lng': coordinate['sw_lng']},
+            {'ne_lat': coordinate['ne_lat'], 'ne_lng': str(mid_lng), 'sw_lat': str(mid_lat),'sw_lng': coordinate['sw_lng']},
+            {'ne_lat': str(mid_lat), 'ne_lng': coordinate['ne_lng'], 'sw_lat': coordinate['sw_lat'],'sw_lng': str(mid_lng)},
         ]
         itr_search(new_coorindates)
 
@@ -89,7 +130,7 @@ def each_page(driver):
         break
         if next_page_button.is_enabled():
             next_page_button.click()
-            time.sleep(2)
+            time.sleep(7)
         else:
             #Reached last page
             break
@@ -106,4 +147,3 @@ def generate_file(result):
 if __name__ == "__main__":
     itr_search(coordinates)
     # generate_file(result)
-# each_page()

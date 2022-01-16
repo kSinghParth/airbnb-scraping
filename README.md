@@ -24,4 +24,8 @@ Selenium.
 
 
 
-Realized a new limitation with Selenium. 
+Airbnb only shows 20 results per page and 15 pages at max. Therefore if we need to scrape more than 300 entries, we will have to partition the target area based on latitude and longitude.
+
+
+
+Problem: IP is very slow. Conenction to airbnb not working.
