@@ -15,7 +15,9 @@ search_url = 'https://www.airbnb.com/s/' + city_code + '/homes?tab_id=home_tab&r
 
 coordinates = [
 		{'ne_lat': '42.37247755007246', 'ne_lng': '-71.012691', 'sw_lat': '42.290420','sw_lng': '-71.113040'},
-		{'ne_lat': '42.295550', 'ne_lng': '-71.112440', 'sw_lat': '42.253888','sw_lng': '-71.168058}
+		{'ne_lat': '42.295550', 'ne_lng': '-71.112440', 'sw_lat': '42.253888','sw_lng': '-71.168058'},
+		{'ne_lat': '42.371552', 'ne_lng': ' -71.122418', 'sw_lat': '42.333288','sw_lng': '-71.168926'},
+		
 	]
 
 result_file_name = 'listing_in_boston.csv'

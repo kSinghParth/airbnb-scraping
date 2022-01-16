@@ -1,0 +1,48 @@
+2022-01-16 04:59:57,447 - DEBUG - Starting new HTTPS connection (1): www.sslproxies.org:443
+2022-01-16 04:59:57,630 - DEBUG - https://www.sslproxies.org:443 "GET / HTTP/1.1" 200 None
+2022-01-16 04:59:57,672 - DEBUG - Starting new HTTP connection (1): 163.116.136.117:8081
+2022-01-16 04:59:58,165 - DEBUG - http://163.116.136.117:8081 "GET http://www.google.com/ HTTP/1.1" 200 6298
+2022-01-16 04:59:58,172 - DEBUG - Starting new HTTP connection (1): 163.116.136.117:8081
+2022-01-16 04:59:58,677 - DEBUG - http://163.116.136.117:8081 "GET http://www.google.com/ HTTP/1.1" 200 6272
+2022-01-16 04:59:58,679 - INFO - Proxy selected: http://163.116.136.117:8081
+2022-01-16 04:59:59,198 - DEBUG - POST http://localhost:62137/session {"capabilities": {"firstMatch": [{}], "alwaysMatch": {"browserName": "chrome", "proxy": {"httpsProxy": "http://163.116.136.117:8081", "httpProxy": "http://163.116.136.117:8081", "ftpProxy": "http://163.116.136.117:8081", "sslProxy": "http://163.116.136.117:8081", "proxyType": "manual"}, "pageLoadStrategy": "normal", "goog:chromeOptions": {"extensions": [], "args": []}}}, "desiredCapabilities": {"browserName": "chrome", "proxy": {"httpsProxy": "http://163.116.136.117:8081", "httpProxy": "http://163.116.136.117:8081", "ftpProxy": "http://163.116.136.117:8081", "sslProxy": "http://163.116.136.117:8081", "proxyType": "MANUAL"}, "pageLoadStrategy": "normal", "goog:chromeOptions": {"extensions": [], "args": []}}}
+2022-01-16 04:59:59,200 - DEBUG - Starting new HTTP connection (1): localhost:62137
+2022-01-16 05:00:02,048 - DEBUG - http://localhost:62137 "POST /session HTTP/1.1" 200 985
+2022-01-16 05:00:02,049 - DEBUG - Finished Request
+2022-01-16 05:00:02,049 - INFO - xxxxxxxxxx42.37247755007246,-71.012691,42.290420,-71.113040 is already covered.
+2022-01-16 05:00:02,054 - INFO - ----------42.295550,-71.112440,42.253888,-71.168058 starting search.
+2022-01-16 05:00:02,055 - DEBUG - POST http://localhost:62137/session/7f062655c12e4e317a257606e2e75b90/url {"url": "https://www.airbnb.com/s/Boston--MA--United-States/homes?tab_id=home_tab&refinement_paths%5B%5D=%2Fhomes&query=Boston%2C%20MA%2C%20United%20States&place_id=ChIJGzE9DS1l44kRoOhiASS_fHg&ne_lat=42.295550&ne_lng=-71.112440&sw_lat=42.253888&sw_lng=-71.168058"}
+2022-01-16 05:00:03,409 - DEBUG - http://localhost:62137 "POST /session/7f062655c12e4e317a257606e2e75b90/url HTTP/1.1" 500 2357
+2022-01-16 05:00:03,409 - DEBUG - Finished Request
+2022-01-16 05:00:03,410 - INFO - Exception occured
+2022-01-16 05:00:03,410 - INFO - Message: unknown error: net::ERR_CONNECTION_CLOSED
+  (Session info: chrome=97.0.4692.71)
+Stacktrace:
+0   chromedriver                        0x0000000101eb5e69 chromedriver + 5160553
+1   chromedriver                        0x0000000101e40593 chromedriver + 4679059
+2   chromedriver                        0x00000001019f42c8 chromedriver + 172744
+3   chromedriver                        0x00000001019ee1b7 chromedriver + 147895
+4   chromedriver                        0x00000001019dfe4d chromedriver + 89677
+5   chromedriver                        0x00000001019e0c06 chromedriver + 93190
+6   chromedriver                        0x00000001019e00c6 chromedriver + 90310
+7   chromedriver                        0x00000001019df6a6 chromedriver + 87718
+8   chromedriver                        0x00000001019de6dc chromedriver + 83676
+9   chromedriver                        0x00000001019de9d3 chromedriver + 84435
+10  chromedriver                        0x00000001019f5cfe chromedriver + 179454
+11  chromedriver                        0x0000000101a5a861 chromedriver + 591969
+12  chromedriver                        0x0000000101a47312 chromedriver + 512786
+13  chromedriver                        0x0000000101a5a0ab chromedriver + 589995
+14  chromedriver                        0x0000000101a47623 chromedriver + 513571
+15  chromedriver                        0x0000000101a1cdce chromedriver + 339406
+16  chromedriver                        0x0000000101a1e105 chromedriver + 344325
+17  chromedriver                        0x0000000101e7123e chromedriver + 4878910
+18  chromedriver                        0x0000000101e88d17 chromedriver + 4975895
+19  chromedriver                        0x0000000101e8ea3f chromedriver + 4999743
+20  chromedriver                        0x0000000101e8961a chromedriver + 4978202
+21  chromedriver                        0x0000000101e65bb1 chromedriver + 4832177
+22  chromedriver                        0x0000000101ea5fd8 chromedriver + 5095384
+23  chromedriver                        0x0000000101ea6161 chromedriver + 5095777
+24  chromedriver                        0x0000000101ebd2a8 chromedriver + 5190312
+25  libsystem_pthread.dylib             0x00007fff204cb8fc _pthread_start + 224
+26  libsystem_pthread.dylib             0x00007fff204c7443 thread_start + 15
+
