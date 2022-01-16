@@ -13,14 +13,19 @@ import os
 import time
 import yaml
 import csv
+import json
 
 # import chromedriver_autoinstaller # pip install chromedriver-autoinstaller
 # chromedriver_autoinstaller.install()
 
-from constants import next_button_selector, listings_selector, listing_name_selector, listing_rating_selector, result_file_name, search_url, coordinates
+from constants import next_button_selector, listings_selector, listing_name_selector, listing_rating_selector, result_file_name, search_url, coordinates, coordinate_lookup_file_name
 
 #Result object
 result = {}
+stored_result = {}
+stored_coordinate_searched = []
+coordinates_searched = []
+persistent_searching = True
 headerrow = ['Name and Description', 'Rating']
 
 # # Trying out different free proxy
@@ -65,6 +70,7 @@ def itr_search(coordinates):
     chrome_driver = os.environ.get('CHROME_DRIVER')
     driver=webdriver.Chrome(executable_path=chrome_driver)
 
+    # # Testing IP Proxy
     # driver.get('https://www.expressvpn.com/what-is-my-ip')
     # time.sleep(20)
 
@@ -96,8 +102,9 @@ def grid_search_and_divide(coordinate, driver):
             {'ne_lat': coordinate['ne_lat'], 'ne_lng': str(mid_lng), 'sw_lat': str(mid_lat),'sw_lng': coordinate['sw_lng']},
             {'ne_lat': str(mid_lat), 'ne_lng': coordinate['ne_lng'], 'sw_lat': coordinate['sw_lat'],'sw_lng': str(mid_lng)},
         ]
-        itr_search(new_coorindates)
+        # itr_search(new_coorindates)
 
+    coordinates_searched.append(coordinate['ne_lat']+coordinate['ne_lng']+coordinate['sw_lat']+coordinate['sw_lng'])
 
 
 
@@ -125,14 +132,18 @@ def each_page(driver):
             result[name_of_listing] = [name_of_listing, rating_of_listing]
             local_listing_count = local_listing_count + 1
         
-        #Handling pagination of results    
-        next_page_button = driver.find_element(By.CSS_SELECTOR,next_button_selector)
-        break
-        if next_page_button.is_enabled():
-            next_page_button.click()
-            time.sleep(7)
-        else:
-            #Reached last page
+        try:
+            #Handling pagination of results    
+            next_page_button = driver.find_element(By.CSS_SELECTOR,next_button_selector)
+            break
+            if next_page_button.is_enabled():
+                next_page_button.click()
+                time.sleep(7)
+            else:
+                #Reached last page
+                break
+        except:
+            print("No paginmation exists")
             break
     return local_listing_count
 
@@ -142,8 +153,43 @@ def generate_file(result):
         writer.writerow(headerrow)
         for name in result:
             writer.writerow(result[name])
+    with open(coordinate_lookup_file_name, 'w') as f:
+        json.dump(coordinates_searched, f)
+
+def read_file():
+    if os.path.exists(result_file_name):
+        try:
+            with open(result_file_name, 'r') as f:
+                csvreader = csv.reader(f)
+                for row in csvreader:
+                    print(row) 
+        except Exception as e:
+            print(e)
+            print("Unable to open result file. Probably file does not exist.")
+
+
+    if os.path.exists(coordinate_lookup_file_name):
+        try:
+            with open(coordinate_lookup_file_name, 'r') as f:
+                stored_coordinate_searched = json.load(f)
+                print(stored_coordinate_searched)
+        except Exception as e:
+            print(e)
+            print("Unable to open coordinate lookup file. Probably file does not exist.")
 
 
 if __name__ == "__main__":
-    itr_search(coordinates)
+    try:
+        with open("conf.yaml", 'r') as stream:
+            persistent_searching = yaml.safe_load(stream).get('persistent_searching')
+    except:
+        print('Unable to read persistent searching flag. Default set to True.')
+
+    if persistent_searching:
+        read_file()
+    
+    # try:
+    #     itr_search(coordinates)
+    # except:
+    #     pass
     # generate_file(result)

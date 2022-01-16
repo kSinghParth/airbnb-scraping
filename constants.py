@@ -15,3 +15,4 @@ coordinates = [
 	]
 
 result_file_name = 'listing_in_boston.csv'
+coordinate_lookup_file_name = 'coordinate_lookup.json'

@@ -29,3 +29,8 @@ Airbnb only shows 20 results per page and 15 pages at max. Therefore if we need 
 
 
 Problem: IP is very slow. Conenction to airbnb not working.
+
+
+
+
+adding support for persistent searchibng. There can be multiple reasons for the program to crash, IP proxy being the primary one. For such cases we need to store the data that has already been parsed. We canniot be parsing all the coordinated everytime. Here we are performing memoization.	

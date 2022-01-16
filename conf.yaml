@@ -1,1 +1,2 @@
+persistent_searching: True
 chrome_driver: 'chrome driver location here'
