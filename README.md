@@ -1,36 +1,59 @@
 # airbnb-scrapping
-A scrapping bot to pick hotels from Boston
+## A scrapping bot to list hotels from Boston
 
 
-Airbnb does not provide an official API which can be used by developers. However, the frontend does utilize API to populate the data. This can be seen from the Web Inspector.
+1. Airbnb does not provide an official API which can be used by developers. However, the frontend does utilize API to populate the data. This can be seen from the Web Inspector.
 
-There are multiple projects on github which exploit this. After trying out a few of those projects, I realized that they are older APIs which Airbnb uses. Airbnb updates thier APIs frequently which results in these projects to break. These projects relied on the user providing it the API_KEY. This key could be found in the Network tab of Web Inspector. But with the latest API calls, though you can find your API_KEY, you cannot use it for the search query. Airbnb seems to be using an OAuth kind of mechanism to grant access to it's data.
+
+2. There are multiple projects on github which exploit this. After trying out a few of those projects, I realized that they are older APIs which Airbnb uses. Airbnb updates thier APIs frequently which results in these projects to break. These projects required the user to provide their API_KEY. This key could be found in the Network tab of Web Inspector. But with the latest API calls version that Airbnb is using, although you can find your API_KEY, you cannot use it for the search query. Airbnb seems to be using an OAuth kind of mechanism to grant access to it's data.
 
 Example on a project which used the older version of API- https://github.com/digital-engineering/airbnb-scraper
 
 Therefore, to fetch data, the only option left at this point is to scrap the HTML.
 
 
-I will be using Scrapy for the same.
+3. InitiallyI decide to useto use Scrapy. It is much faster than selenium because it doesn't render the page on any browser. The scrapy shell also helps in quickly figuring out HTML elements structure and 
 
 
-Using Scrapy:
+4. Using Scrapy:
 
-Scrapy seemed like the next best option. But Airbnb is a Single Page Application. Most of the content of the page is loaded dynamically by JS(this is why unofficial APIs are avialbale in the first place), which is why Scrapy is unabel to read it.
+Scrapy seemed like the next best option. But Airbnb is a Single Page Application. Most of the content of the page is loaded dynamically by JS(this is why unofficial APIs are avialbale in the first place), which is why Scrapy is unable to read it. Scrapy cannot render dynamic data, unfortunately.
 
 
-Now I'll have to do something, which I was trying to avoid from the very beginning.
+5. Now I'll have to do something, which I was trying to avoid from the very beginning.
 Selenium.
 
 
+6. Airbnb only shows 20 results per page and 15 pages at max. Therefore if we need to scrape more than 300 entries in any area, we will have to partition the search area into smaller areas.
 
-Airbnb only shows 20 results per page and 15 pages at max. Therefore if we need to scrape more than 300 entries, we will have to partition the target area based on latitude and longitude.
-
-
-
-Problem: IP is very slow. Conenction to airbnb not working.
+Each time I see that a search area has more than 300 listings, I partition the area into 4 quarters and then search those individually. If any of those 4 quarters contain more than 300 entries, it will be partitioned further, and so on. Recursion-ion-ion-ion.
 
 
+7. Finally, Airbnb will likely block an IP if used to often, so I had torotate IP using proxies. 
+
+I used a couple of libraries like FreeProxya and http_request_randomizer, and even directly queried sslproxies.org, but those IPs greatly increaded the latency to the point that some requests with timing out. I tried using elite IPs, but didn't solve the problem either.  Airbnb was not opening at all for certain regions altogether. Requests were straight away denied.. 
+Perhaps a paid IP Proy service, like zyte.org will help here.
 
 
-adding support for persistent searchibng. There can be multiple reasons for the program to crash, IP proxy being the primary one. For such cases we need to store the data that has already been parsed. We canniot be parsing all the coordinated everytime. Here we are performing memoization.	
+8. A little something I addded extra to the project.
+
+The ultimate goal of the project is not to scrape Boston, but all of United States. The script will run for a considerable amount of time and there are numerous network calls involved (airbnb, proxies), any of which can fail because of various reasons.
+Right now the primary reason for failure was timeouts by proxy service.
+
+For this reason, I have added support for **Persistent Searching**. 
+I have used Memoization, and have stored the data that has already been parsed. We cannot be parsing all the coordinated everytime. 
+
+Thsi feature of Persistent Searching can be disabled by setting
+
+```yaml
+persistent_searching: False
+```
+in conf.yaml
+
+If enabled, it will not process locations that the scrapper has already processed.
+
+
+9. The application has DEBUG level logging setup.
+
+
+![Test Image](/images/airbnb_home.png)
