@@ -11,7 +11,10 @@ import time
 import yaml
 import csv
 
-from css_selectors import next_button_selector, listings_selector, listing_name_selector, listing_rating_selector, result_file_name 
+# import chromedriver_autoinstaller # pip install chromedriver-autoinstaller
+# chromedriver_autoinstaller.install()
+
+from constants import next_button_selector, listings_selector, listing_name_selector, listing_rating_selector, result_file_name, search_url, coordinates
 
 
 #Driver setup
@@ -28,13 +31,37 @@ driver=webdriver.Chrome(executable_path=chrome_driver)
 result = {}
 headerrow = ['Name and Description', 'Rating']
 
-#Starting the driver
-driver.get('https://www.airbnb.com/s/Boston--MA--United-States/homes?place_id=ChIJGzE9DS1l44kRoOhiASS_fHg&refinement_paths%5B%5D=%2Fhomes&adults=0&children=0&infants=0&pets=0&search_type=AUTOSUGGEST')
+def itr_search(coordinates):
+    for coordinate  in coordinates:
+        grid_search_and_divide(coordinate)
 
-#Allow loading time for the whole page to render. Since Airbnb is a SPA, a lot of backend calls are involved
-time.sleep(7)
+def grid_search_and_divide(coordinate):
+    complete_url = search_url
+    for key in coordinate:
+        complete_url = complete_url + '&' + key + '=' + coordinate[key]
 
-def each_page():
+    print(complete_url)
+    #Starting the driver
+    driver.get(complete_url)
+
+    #Allow loading time for the whole page to render. Since Airbnb is a SPA, a lot of backend calls are involved
+    time.sleep(7)
+
+    results_added = each_page(driver)
+
+    if results_added != 0:
+        mid_lat = (float(coordinate['ne_lat']) + float(coordinate['sw_lat']))/2
+        mid_lng = (float(coordinate['ne_lng']) + float(coordinate['sw_lng']))/2
+        new_coorindates = [
+            {'ne_lat': str(mid_lat), 'ne_lng': str(mid_lng), 'sw_lat': coordinate['sw_lat'],'sw_lng': coordinate['sw_lng']},
+        ]
+        itr_search(new_coorindates)
+
+
+
+
+def each_page(driver):
+    local_listing_count = 0
     while True:
         #Scrolling to the bottom of the page, for the next button to render
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight*0.8);")
@@ -43,6 +70,8 @@ def each_page():
         #Selecting a list of all listings on this page
         listings = driver.find_elements(By.CSS_SELECTOR,listings_selector)
         
+        print(len(listings))
+
         for list in listings:
             name_of_listing = list.find_element(By.CSS_SELECTOR,listing_name_selector).text
             if name_of_listing in result:
@@ -53,6 +82,7 @@ def each_page():
                 #Listing does not have a rating
                 rating_of_listing = 'No Rating'
             result[name_of_listing] = [name_of_listing, rating_of_listing]
+            local_listing_count = local_listing_count + 1
         
         #Handling pagination of results    
         next_page_button = driver.find_element(By.CSS_SELECTOR,next_button_selector)
@@ -63,6 +93,7 @@ def each_page():
         else:
             #Reached last page
             break
+    return local_listing_count
 
 def generate_file(result):
     with open(result_file_name, 'w') as f:
@@ -71,5 +102,8 @@ def generate_file(result):
         for name in result:
             writer.writerow(result[name])
 
-each_page()
-generate_file(result)
+
+if __name__ == "__main__":
+    itr_search(coordinates)
+    # generate_file(result)
+# each_page()
