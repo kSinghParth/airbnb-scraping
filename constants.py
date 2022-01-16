@@ -4,6 +4,9 @@ next_button_selector = '._1bfat5l'
 listings_selector = '.ltlgcp'
 listing_name_selector = '.k1pnia7m.dir.dir-ltr'
 listing_rating_selector = '.s1hj3bst.dir.dir-ltr'
+listing_id_selector = '.t16jmdcf.t5nhi1p.t174r01n.dir.dir-ltr'
+
+listing_id_regex = '(title_)(\d+)'
 
 city_name = 'Boston, MA, United States'
 city_code = 'Boston--MA--United-States'

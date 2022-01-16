@@ -14,11 +14,17 @@ import time
 import yaml
 import csv
 import json
+import re
+import logging
+import datetime
 
 # import chromedriver_autoinstaller # pip install chromedriver-autoinstaller
 # chromedriver_autoinstaller.install()
 
-from constants import next_button_selector, listings_selector, listing_name_selector, listing_rating_selector, result_file_name, search_url, coordinates, coordinate_lookup_file_name
+from constants import next_button_selector, listings_selector, listing_id_regex,listing_name_selector, listing_rating_selector, result_file_name, search_url, coordinates, coordinate_lookup_file_name, listing_id_selector
+
+
+logging.basicConfig(filename='logs/airbnb_scapper_' + str(datetime.datetime.now()) + '.log', filemode='w', format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 
 #Result object
 result = {}
@@ -26,7 +32,7 @@ stored_result = {}
 stored_coordinate_searched = []
 coordinates_searched = []
 persistent_searching = True
-headerrow = ['Name and Description', 'Rating']
+headerrow = ['Id','Name and Description', 'Rating']
 
 # # Trying out different free proxy
 #
@@ -34,7 +40,7 @@ headerrow = ['Name and Description', 'Rating']
 #     #Fetching proxies
 #     req_proxy = RequestProxy() #you may get different number of proxy when  you run this at each time
 #     proxies = req_proxy.get_proxy_list() #this will create proxy list
-#     print(proxies[0])
+#     logging.info(proxies[0])
 # except:
 #     pass
 
@@ -42,9 +48,9 @@ def itr_search(coordinates):
 
     # try:
     #     PROXY = FreeProxy(country_id=['US', 'ID', 'JP', 'MX', 'FR', 'IN', 'BR', 'SG', 'DE'], timeout=1, rand=True).get()
-    #     print('Proxy selected: ' + PROXY)
+    #     logging.info('Proxy selected: ' + PROXY)
     # except:
-    #     print('No proxies found')
+    #     logging.info('No proxies found')
     #     PROXY = None
     # # Setting proxy
     # webdriver.DesiredCapabilities.CHROME['proxy']={
@@ -64,7 +70,7 @@ def itr_search(coordinates):
     #     with open("conf.yaml", 'r') as stream:
     #         chrome_driver = yaml.safe_load(stream).get('chrome_driver')
     # except:
-    #     print('Unable to read driver location')
+    #     logging.info('Unable to read driver location')
 
     # # Getting driver location from env variable
     chrome_driver = os.environ.get('CHROME_DRIVER')
@@ -76,7 +82,11 @@ def itr_search(coordinates):
 
     for coordinate  in coordinates:
         if is_coordinate_search_allowed(coordinate):
+            logging.info('----------' + coordinate_string(coordinate) + ' starting search.')
             grid_search_and_divide(coordinate, driver)
+            logging.info('==========' + coordinate_string(coordinate) + 'completed search.')
+        else:
+            logging.info('xxxxxxxxxx' + coordinate_string(coordinate) + ' is already covered.')
 
     # driver.close()
 
@@ -93,13 +103,23 @@ def is_coordinate_search_allowed(coordinate):
     return True
 
 
-def is_listing_allowed(listing):
-    if listing in result: 
+def is_listing_allowed(listing_id):
+    if listing_id in result: 
         return False
     if persistent_searching:
-        if listing in stored_result:
+        if listing_id in stored_result:
             return False
     return True
+
+def parse_id(attr_id):
+    try:
+        # two groups enclosed in separate ( and ) bracket
+        result = re.search(listing_id_regex, attr_id)
+
+        return result.group(2)
+    except:
+        logging.info('Exception occured while extarcting id')
+        return attr_id
 
 def grid_search_and_divide(coordinate, driver):
     complete_url = search_url
@@ -114,7 +134,9 @@ def grid_search_and_divide(coordinate, driver):
 
     results_added = each_page(driver)
 
+    logging.info("Results from coordinates: " + str(results_added))
     if results_added >= 300 :
+        logging.info("Diving further " + coordinate_string(coordinate))
         mid_lat = (float(coordinate['ne_lat']) + float(coordinate['sw_lat']))/2
         mid_lng = (float(coordinate['ne_lng']) + float(coordinate['sw_lng']))/2
         new_coorindates = [
@@ -139,18 +161,19 @@ def each_page(driver):
         listings = driver.find_elements(By.CSS_SELECTOR,listings_selector)
         
         for list in listings:
-            name_of_listing = list.find_element(By.CSS_SELECTOR,listing_name_selector).text
-            # print(list.find_element(By.CSS_SELECTOR,'.t16jmdcf.t5nhi1p.t174r01n.dir.dir-ltr').get_attribute("id"))
-            if is_listing_allowed(name_of_listing):
+            listing_id = parse_id(list.find_element(By.CSS_SELECTOR,listing_id_selector).get_attribute("id"))
+            if is_listing_allowed(listing_id):
                 try:
+                    name_of_listing = list.find_element(By.CSS_SELECTOR,listing_name_selector).text
                     rating_of_listing = list.find_element(By.CSS_SELECTOR,listing_rating_selector).text
                 except:
                     #Listing does not have a rating
                     rating_of_listing = 'No Rating'
-                result[name_of_listing] = [name_of_listing, rating_of_listing]
+                    logging.info(listing_id + ' has no rating')
+                result[listing_id] = [listing_id, name_of_listing, rating_of_listing]
                 local_listing_count = local_listing_count + 1
+                logging.info('Added listing: ' + listing_id)
         
-        break
         try:
             #Handling pagination of results    
             next_page_button = driver.find_element(By.CSS_SELECTOR,next_button_selector)
@@ -161,7 +184,7 @@ def each_page(driver):
                 #Reached last page
                 break
         except:
-            print("No paginmation exists")
+            logging.info("No paginmation exists")
             break
     return local_listing_count
 
@@ -180,8 +203,8 @@ def generate_file(result):
         writer = csv.writer(f)
         if add_header:
             writer.writerow(headerrow)
-        for name in result:
-            writer.writerow(result[name])
+        for id in result:
+            writer.writerow(result[id])
     with open(coordinate_lookup_file_name, 'w') as f:
         coordinates_searched.extend(stored_coordinate_searched)
         json.dump(coordinates_searched, f)
@@ -193,10 +216,10 @@ def read_file():
             with open(result_file_name, 'r') as f:
                 csvreader = csv.reader(f)
                 for row in csvreader:
-                    stored_result[row[0]] = [row[0], row[1]]
+                    stored_result[row[0]] = [row[0], row[1], row[2]]
         except Exception as e:
-            print(e)
-            print("Unable to open result file. Probably file does not exist.")
+            logging.info(e)
+            logging.info("Unable to open result file. Probably file does not exist.")
 
 
     if os.path.exists(coordinate_lookup_file_name):
@@ -204,15 +227,15 @@ def read_file():
             with open(coordinate_lookup_file_name, 'r') as f:
                 stored_coordinate_searched.extend(json.load(f))
         except Exception as e:
-            print(e)
-            print("Unable to open coordinate lookup file. Probably file does not exist.")
+            logging.info(e)
+            logging.info("Unable to open coordinate lookup file. Probably file does not exist.")
     
 if __name__ == "__main__":
     try:
         with open("conf.yaml", 'r') as stream:
             persistent_searching = yaml.safe_load(stream).get('persistent_searching')
     except:
-        print('Unable to read persistent searching flag. Default set to True.')
+        logging.info('Unable to read persistent searching flag. Default set to True.')
 
     if persistent_searching:
         read_file()
@@ -220,8 +243,8 @@ if __name__ == "__main__":
     try:
         itr_search(coordinates)
     except Exception as  e:
-        print('Exception occured')
-        print(e)
+        logging.info('Exception occured')
+        logging.info(e)
         
     generate_file(result)
 
