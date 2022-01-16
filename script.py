@@ -75,25 +75,46 @@ def itr_search(coordinates):
     # time.sleep(20)
 
     for coordinate  in coordinates:
-        grid_search_and_divide(coordinate, driver)
+        if is_coordinate_search_allowed(coordinate):
+            grid_search_and_divide(coordinate, driver)
 
     # driver.close()
+
+def coordinate_string(coordinate):
+    return coordinate['ne_lat']+','+coordinate['ne_lng']+','+coordinate['sw_lat']+','+coordinate['sw_lng']
+
+def is_coordinate_search_allowed(coordinate):
+    cdnt_string = coordinate_string(coordinate)
+    if cdnt_string in coordinates_searched: 
+        return False
+    if persistent_searching:
+        if cdnt_string in stored_coordinate_searched:
+            return False
+    return True
+
+
+def is_listing_allowed(listing):
+    if listing in result: 
+        return False
+    if persistent_searching:
+        if listing in stored_result:
+            return False
+    return True
 
 def grid_search_and_divide(coordinate, driver):
     complete_url = search_url
     for key in coordinate:
         complete_url = complete_url + '&' + key + '=' + coordinate[key]
 
-    print(complete_url)
     #Starting the driver
     driver.get(complete_url)
 
     #Allow loading time for the whole page to render. Since Airbnb is a SPA, a lot of backend calls are involved
-    time.sleep(10)
+    time.sleep(7)
 
     results_added = each_page(driver)
-
-    if results_added != 0:
+    return
+    if results_added >= 300 :
         mid_lat = (float(coordinate['ne_lat']) + float(coordinate['sw_lat']))/2
         mid_lng = (float(coordinate['ne_lng']) + float(coordinate['sw_lng']))/2
         new_coorindates = [
@@ -102,9 +123,9 @@ def grid_search_and_divide(coordinate, driver):
             {'ne_lat': coordinate['ne_lat'], 'ne_lng': str(mid_lng), 'sw_lat': str(mid_lat),'sw_lng': coordinate['sw_lng']},
             {'ne_lat': str(mid_lat), 'ne_lng': coordinate['ne_lng'], 'sw_lat': coordinate['sw_lat'],'sw_lng': str(mid_lng)},
         ]
-        # itr_search(new_coorindates)
+        itr_search(new_coorindates)
 
-    coordinates_searched.append(coordinate['ne_lat']+coordinate['ne_lng']+coordinate['sw_lat']+coordinate['sw_lng'])
+    coordinates_searched.append(coordinate_string(coordinate))
 
 
 
@@ -118,24 +139,20 @@ def each_page(driver):
         #Selecting a list of all listings on this page
         listings = driver.find_elements(By.CSS_SELECTOR,listings_selector)
         
-        print(len(listings))
-
         for list in listings:
             name_of_listing = list.find_element(By.CSS_SELECTOR,listing_name_selector).text
-            if name_of_listing in result:
-                continue
-            try:
-                rating_of_listing = list.find_element(By.CSS_SELECTOR,listing_rating_selector).text
-            except:
-                #Listing does not have a rating
-                rating_of_listing = 'No Rating'
-            result[name_of_listing] = [name_of_listing, rating_of_listing]
-            local_listing_count = local_listing_count + 1
-        
+            if is_listing_allowed(name_of_listing):
+                try:
+                    rating_of_listing = list.find_element(By.CSS_SELECTOR,listing_rating_selector).text
+                except:
+                    #Listing does not have a rating
+                    rating_of_listing = 'No Rating'
+                result[name_of_listing] = [name_of_listing, rating_of_listing]
+                local_listing_count = local_listing_count + 1
+        break
         try:
             #Handling pagination of results    
             next_page_button = driver.find_element(By.CSS_SELECTOR,next_button_selector)
-            break
             if next_page_button.is_enabled():
                 next_page_button.click()
                 time.sleep(7)
@@ -148,12 +165,12 @@ def each_page(driver):
     return local_listing_count
 
 def generate_file(result):
-    with open(result_file_name, 'w') as f:
+    with open(result_file_name, 'a') as f:
         writer = csv.writer(f)
         writer.writerow(headerrow)
         for name in result:
             writer.writerow(result[name])
-    with open(coordinate_lookup_file_name, 'w') as f:
+    with open(coordinate_lookup_file_name, 'a') as f:
         json.dump(coordinates_searched, f)
 
 def read_file():
@@ -162,7 +179,7 @@ def read_file():
             with open(result_file_name, 'r') as f:
                 csvreader = csv.reader(f)
                 for row in csvreader:
-                    print(row) 
+                    stored_result[row[0]] = [row[0], row[1]]
         except Exception as e:
             print(e)
             print("Unable to open result file. Probably file does not exist.")
@@ -188,8 +205,10 @@ if __name__ == "__main__":
     if persistent_searching:
         read_file()
     
-    # try:
-    #     itr_search(coordinates)
-    # except:
-    #     pass
-    # generate_file(result)
+    try:
+        itr_search(coordinates)
+    except Exception as  e:
+        print('Exception occured')
+        print(e)
+        
+    generate_file(result)
