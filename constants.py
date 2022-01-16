@@ -14,7 +14,8 @@ city_code = 'Boston--MA--United-States'
 search_url = 'https://www.airbnb.com/s/' + city_code + '/homes?tab_id=home_tab&refinement_paths%5B%5D=%2Fhomes&query=' + urllib.parse.quote(city_name) + '&place_id=ChIJGzE9DS1l44kRoOhiASS_fHg'
 
 coordinates = [
-		{'ne_lat': '42.37247755007246', 'ne_lng': '-71.012691', 'sw_lat': '42.290420','sw_lng': '-71.113040'}
+		{'ne_lat': '42.37247755007246', 'ne_lng': '-71.012691', 'sw_lat': '42.290420','sw_lng': '-71.113040'},
+		{'ne_lat': '42.295550', 'ne_lng': '-71.112440', 'sw_lat': '42.253888','sw_lng': '-71.168058}
 	]
 
 result_file_name = 'listing_in_boston.csv'

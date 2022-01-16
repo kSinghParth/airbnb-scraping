@@ -30,6 +30,10 @@ Selenium.
 
 Each time I see that a search area has more than 300 listings, I partition the area into 4 quarters and then search those individually. If any of those 4 quarters contain more than 300 entries, it will be partitioned further, and so on. Recursion-ion-ion-ion.
 
+Since, with latitude longitude boundaries, I can only parse rectangular areas, please see below the covered area. 
+
+![Boston covered area](/images/covered_area.png)
+
 
 7. Finally, Airbnb will likely block an IP if used to often, so I had torotate IP using proxies. 
 
