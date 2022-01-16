@@ -113,7 +113,7 @@ def grid_search_and_divide(coordinate, driver):
     time.sleep(7)
 
     results_added = each_page(driver)
-    return
+
     if results_added >= 300 :
         mid_lat = (float(coordinate['ne_lat']) + float(coordinate['sw_lat']))/2
         mid_lng = (float(coordinate['ne_lng']) + float(coordinate['sw_lng']))/2
@@ -128,7 +128,6 @@ def grid_search_and_divide(coordinate, driver):
     coordinates_searched.append(coordinate_string(coordinate))
 
 
-
 def each_page(driver):
     local_listing_count = 0
     while True:
@@ -141,6 +140,7 @@ def each_page(driver):
         
         for list in listings:
             name_of_listing = list.find_element(By.CSS_SELECTOR,listing_name_selector).text
+            # print(list.find_element(By.CSS_SELECTOR,'.t16jmdcf.t5nhi1p.t174r01n.dir.dir-ltr').get_attribute("id"))
             if is_listing_allowed(name_of_listing):
                 try:
                     rating_of_listing = list.find_element(By.CSS_SELECTOR,listing_rating_selector).text
@@ -149,13 +149,14 @@ def each_page(driver):
                     rating_of_listing = 'No Rating'
                 result[name_of_listing] = [name_of_listing, rating_of_listing]
                 local_listing_count = local_listing_count + 1
+        
         break
         try:
             #Handling pagination of results    
             next_page_button = driver.find_element(By.CSS_SELECTOR,next_button_selector)
             if next_page_button.is_enabled():
                 next_page_button.click()
-                time.sleep(7)
+                time.sleep(4)
             else:
                 #Reached last page
                 break
@@ -165,15 +166,28 @@ def each_page(driver):
     return local_listing_count
 
 def generate_file(result):
-    with open(result_file_name, 'a') as f:
+    add_header = False
+    if os.path.exists(result_file_name)==False or len(stored_result)==0:
+        add_header = True
+
+    if  persistent_searching==False:
+        mode = 'w'
+        add_header = True
+    else:
+        mode = 'a'
+
+    with open(result_file_name, mode) as f:
         writer = csv.writer(f)
-        writer.writerow(headerrow)
+        if add_header:
+            writer.writerow(headerrow)
         for name in result:
             writer.writerow(result[name])
-    with open(coordinate_lookup_file_name, 'a') as f:
+    with open(coordinate_lookup_file_name, 'w') as f:
+        coordinates_searched.extend(stored_coordinate_searched)
         json.dump(coordinates_searched, f)
 
 def read_file():
+    global stored_coordinate_searched
     if os.path.exists(result_file_name):
         try:
             with open(result_file_name, 'r') as f:
@@ -188,13 +202,11 @@ def read_file():
     if os.path.exists(coordinate_lookup_file_name):
         try:
             with open(coordinate_lookup_file_name, 'r') as f:
-                stored_coordinate_searched = json.load(f)
-                print(stored_coordinate_searched)
+                stored_coordinate_searched.extend(json.load(f))
         except Exception as e:
             print(e)
             print("Unable to open coordinate lookup file. Probably file does not exist.")
-
-
+    
 if __name__ == "__main__":
     try:
         with open("conf.yaml", 'r') as stream:
@@ -204,7 +216,7 @@ if __name__ == "__main__":
 
     if persistent_searching:
         read_file()
-    
+
     try:
         itr_search(coordinates)
     except Exception as  e:
@@ -212,3 +224,4 @@ if __name__ == "__main__":
         print(e)
         
     generate_file(result)
+
