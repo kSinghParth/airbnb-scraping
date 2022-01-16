@@ -46,20 +46,20 @@ headerrow = ['Id','Name and Description', 'Rating']
 
 def itr_search(coordinates):
 
-    # try:
-    #     PROXY = FreeProxy(country_id=['US', 'ID', 'JP', 'MX', 'FR', 'IN', 'BR', 'SG', 'DE'], timeout=1, rand=True).get()
-    #     logging.info('Proxy selected: ' + PROXY)
-    # except:
-    #     logging.info('No proxies found')
-    #     PROXY = None
-    # # Setting proxy
-    # webdriver.DesiredCapabilities.CHROME['proxy']={
-    # "httpsProxy":PROXY,
-    # "httpProxy":PROXY,
-    # "ftpProxy":PROXY,
-    # "sslProxy":PROXY,
-    # "proxyType":"MANUAL",
-    # }
+    try:
+        PROXY = FreeProxy(country_id=['US', 'ID', 'JP', 'MX', 'FR', 'IN', 'BR', 'SG', 'DE'], timeout=1, rand=True).get()
+        logging.info('Proxy selected: ' + PROXY)
+    except:
+        logging.info('No proxies found')
+        PROXY = None
+    # Setting proxy
+    webdriver.DesiredCapabilities.CHROME['proxy']={
+    "httpsProxy":PROXY,
+    "httpProxy":PROXY,
+    "ftpProxy":PROXY,
+    "sslProxy":PROXY,
+    "proxyType":"MANUAL",
+    }
 
     # # Driver setup
     

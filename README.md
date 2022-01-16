@@ -2,6 +2,8 @@
 ## A scrapping bot to list hotels from Boston
 
 
+![Test Image](/images/airbnb_home.png)
+
 1. Airbnb does not provide an official API which can be used by developers. However, the frontend does utilize API to populate the data. This can be seen from the Web Inspector.
 
 
@@ -56,4 +58,29 @@ If enabled, it will not process locations that the scrapper has already processe
 9. The application has DEBUG level logging setup.
 
 
-![Test Image](/images/airbnb_home.png)
+## Installation
+
+1. Create virtual environment.
+```shell
+virtualenv venv
+```
+2. Start virtual environment.
+```Shell
+source venv/bin/activate
+```
+3. If your chrome driver location is set as an environment variable, you dont need to worry.
+If not, please go ahead and change the location in conf.yaml.
+`chrome_driver`
+
+You will also have to uncomment the lines 69-73 in script.py
+
+4. Set Persistent Searching in conf.yaml as per your requirement. True/False.
+
+5. Run project
+```Shell
+python script.py
+
+```
+
+
+Note: Even if the script crashes at any point, you don't need to worry, simply run it again, and it won't search the previously parsed latitudes and longitudes.
