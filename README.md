@@ -84,14 +84,14 @@ I parsed Boston city with two approaches.
 
 ![Boston covered area with single block](/images/covered_area_single.png)
 
-	Number of Listings returned = 3707
+Number of Listings returned = 3707
 
-	You can find the list here: https://github.com/kSinghParth/airbnb-scrapping/blob/main/listing_in_boston_single.csv
+You can find the list here: https://github.com/kSinghParth/airbnb-scrapping/blob/main/listing_in_boston_single.csv
 
 2. With multiple smaller blocks to keep the search results strictly within Boston.
 
 ![Boston covered area with blocks](/images/covered_area_blocks.png)
 
-	Number of Listings returned = 3113
+Number of Listings returned = 3113
 
-	You can find the list here: https://github.com/kSinghParth/airbnb-scrapping/blob/main/listing_in_boston_blocks.csv
+You can find the list here: https://github.com/kSinghParth/airbnb-scrapping/blob/main/listing_in_boston_blocks.csv
